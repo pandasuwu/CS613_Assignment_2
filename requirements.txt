@@ -1,0 +1,6 @@
+mteb
+sentence-transformers
+pytrec-eval-terrier
+kneed
+scipy
+numpy
