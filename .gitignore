@@ -1,2 +1,3 @@
 emb/
 __pycache__/
+.venv/
