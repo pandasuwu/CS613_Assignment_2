@@ -1,0 +1,33 @@
+[project]
+name = "cs-613-assignment-2-approach-2"
+version = "0.1.0"
+description = "Research on post-processing embeddings"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "kneed>=0.8.6",
+    "mteb>=2.22.1",
+    "numpy>=2.5.3",
+    "pytrec-eval-terrier>=0.5.10",
+    "scipy>=1.18.1",
+    "sentence-transformers>=6.1.0",
+    "torch>=2.14.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.9",
+    "ty>=0.0.84",
+]
+
+[tool.ruff]
+extend-exclude = ["references", "temp"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
+
+[tool.ty.src]
+include = ["src/**/*.py", "*.py"]
+exclude = ["references/**", "temp/**"]
+

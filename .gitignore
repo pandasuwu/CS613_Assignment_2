@@ -1,3 +1,9 @@
 emb/
 __pycache__/
 .venv/
+temp/
+cache/
+logs/
+specification.md
+.ruff_cache/
+references/
