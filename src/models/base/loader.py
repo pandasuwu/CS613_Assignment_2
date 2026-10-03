@@ -3,7 +3,7 @@ from typing import Any
 import torch
 from transformers import AutoModel, AutoTokenizer
 
-from src.config import get_device, logger
+from src.config import MAX_SEQ_LENGTH, get_device, logger
 
 
 def load_base_model(model_id: str) -> tuple[Any, Any]:
@@ -17,13 +17,14 @@ def load_base_model(model_id: str) -> tuple[Any, Any]:
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.model_max_length = MAX_SEQ_LENGTH
 
     model: Any = AutoModel.from_pretrained(
         model_id,
         dtype=torch.float32,
         trust_remote_code=True,
     )
-    model.to(device)
+    model.to(device=device, dtype=torch.float32)
     model.eval()
 
     return model, tokenizer

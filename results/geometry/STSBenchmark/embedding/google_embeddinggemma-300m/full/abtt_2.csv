@@ -1,6 +1,6 @@
 metric,value
-centroid_norm,0.007929
-average_cosine,-0.000663
-mev_top1,0.045938
-nid_spectral_entropy,0.837833
-isoscore,0.158355
+centroid_norm,0.007523
+average_cosine,-0.000314
+mev_top1,0.045213
+nid_spectral_entropy,0.847777
+isoscore,0.163744

@@ -1,3 +1,4 @@
+import torch
 from sentence_transformers import SentenceTransformer
 
 from src.config import MAX_SEQ_LENGTH, get_device, logger
@@ -11,7 +12,10 @@ def load_embedding_model(model_id: str) -> SentenceTransformer:
     model = SentenceTransformer(
         model_id,
         device=device,
-        model_kwargs={"torch_dtype": "float32"},
+        model_kwargs={"dtype": torch.float32},
     )
+    model.to(torch.float32)
     model.max_seq_length = MAX_SEQ_LENGTH
+    if hasattr(model, "tokenizer") and model.tokenizer is not None:
+        model.tokenizer.model_max_length = MAX_SEQ_LENGTH
     return model

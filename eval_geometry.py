@@ -17,8 +17,8 @@ from src.registry import (
     BASE_POOLING_MODES,
     COMPRESSION_LADDER_K,
     EMBEDDING_MODELS,
-    RETRIEVAL_CORE_TASKS,
-    SIMILARITY_CORE_TASKS,
+    RETRIEVAL_TASKS,
+    SIMILARITY_TASKS,
     get_raw_cache_dir,
     get_result_dir,
     get_transformed_cache_dir,
@@ -75,7 +75,6 @@ def evaluate_geometry_combination(
     """Evaluate intrinsic geometry across baseline, full-dimension, and compression transforms."""
     raw_dir = get_raw_cache_dir(task_name, model_id, pooling=pooling)
     is_retrieval = (raw_dir / "corpus.pt").exists()
-    pt_name = "corpus.pt" if is_retrieval else "sentences1.pt"
 
     # 1. Full-Dimension Transforms (including baseline)
     full_methods = [
@@ -88,11 +87,20 @@ def evaluate_geometry_combination(
             continue
 
         trans_dir = get_transformed_cache_dir(task_name, model_id, "full", method, pooling=pooling)
-        tensor_file = trans_dir / pt_name
-        if not tensor_file.exists():
-            continue
+        if is_retrieval:
+            tensor_file = trans_dir / "corpus.pt"
+            if not tensor_file.exists():
+                continue
+            tensor = torch.load(tensor_file, weights_only=True).to(get_device())
+        else:
+            s1_file = trans_dir / "sentences1.pt"
+            s2_file = trans_dir / "sentences2.pt"
+            if not (s1_file.exists() and s2_file.exists()):
+                continue
+            s1 = torch.load(s1_file, weights_only=True).to(get_device())
+            s2 = torch.load(s2_file, weights_only=True).to(get_device())
+            tensor = torch.cat([s1, s2], dim=0)
 
-        tensor = torch.load(tensor_file, weights_only=True).to(get_device())
         res = evaluate_geometry_for_tensor(tensor, csv_path)
         logger.info(
             "[%s | %s | full | %s] Centroid=%.4f  AvgCos=%.4f  MEV=%.4f  NID=%.4f  IsoScore=%.4f",
@@ -110,11 +118,20 @@ def evaluate_geometry_combination(
                 continue
 
             trans_dir = get_transformed_cache_dir(task_name, model_id, "compression", sub_name, pooling=pooling)
-            tensor_file = trans_dir / pt_name
-            if not tensor_file.exists():
-                continue
+            if is_retrieval:
+                tensor_file = trans_dir / "corpus.pt"
+                if not tensor_file.exists():
+                    continue
+                tensor = torch.load(tensor_file, weights_only=True).to(get_device())
+            else:
+                s1_file = trans_dir / "sentences1.pt"
+                s2_file = trans_dir / "sentences2.pt"
+                if not (s1_file.exists() and s2_file.exists()):
+                    continue
+                s1 = torch.load(s1_file, weights_only=True).to(get_device())
+                s2 = torch.load(s2_file, weights_only=True).to(get_device())
+                tensor = torch.cat([s1, s2], dim=0)
 
-            tensor = torch.load(tensor_file, weights_only=True).to(get_device())
             res = evaluate_geometry_for_tensor(tensor, csv_path, extra_cols={"k": k})
             logger.info(
                 "[%s | %s | compression | %s] Centroid=%.4f  AvgCos=%.4f  MEV=%.4f  NID=%.4f  IsoScore=%.4f",
@@ -133,7 +150,7 @@ def main() -> None:
     args = parser.parse_args()
 
     models_to_run = [args.model] if args.model else (EMBEDDING_MODELS + BASE_MODELS)
-    tasks_to_run = [args.task] if args.task else (RETRIEVAL_CORE_TASKS + SIMILARITY_CORE_TASKS)
+    tasks_to_run = [args.task] if args.task else (RETRIEVAL_TASKS + SIMILARITY_TASKS)
 
     for model_id in models_to_run:
         poolings = [args.pooling] if args.pooling else (BASE_POOLING_MODES if is_base_model(model_id) else [None])

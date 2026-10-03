@@ -15,8 +15,7 @@ Base Language Models (evaluated under mean and last-token pooling):
 ## Benchmarks (MTEB v2 English)
 
 Information Retrieval:
-- Development core: FiQA2018, ArguAna, SCIDOCS, TRECCOVID
-- Scale-up suite: FEVERHardNegatives, ClimateFEVERHardNegatives, HotpotQAHardNegatives, Touche2020Retrieval.v3, CQADupstackGamingRetrieval, CQADupstackUnixRetrieval
+- FiQA2018, ArguAna, SCIDOCS, TRECCOVID
 
 Semantic Textual Similarity (STS):
 - STSBenchmark, SICK-R, STS22.v2

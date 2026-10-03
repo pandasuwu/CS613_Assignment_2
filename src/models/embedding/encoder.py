@@ -42,7 +42,7 @@ def encode_embedding_queries(
             convert_to_tensor=True,
         )
 
-    return torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
+    return embeddings.detach().cpu().to(torch.float32)
 
 
 def encode_embedding_corpus(
@@ -72,7 +72,7 @@ def encode_embedding_corpus(
             convert_to_tensor=True,
         )
 
-    return torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
+    return embeddings.detach().cpu().to(torch.float32)
 
 
 def encode_embedding_sentences(
@@ -89,4 +89,4 @@ def encode_embedding_sentences(
         show_progress_bar=show_progress,
         convert_to_tensor=True,
     )
-    return torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
+    return embeddings.detach().cpu().to(torch.float32)

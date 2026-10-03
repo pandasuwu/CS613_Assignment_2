@@ -4,7 +4,23 @@ import torch
 
 
 def compute_nid(x: torch.Tensor) -> float:
-    """Compute Normalized Intrinsic Dimensionality (NID) via normalized spectral entropy (Yokoi et al., 2024)."""
+    """Compute Normalized Intrinsic Dimensionality (NID) via normalized spectral entropy (Yokoi et al., 2024).
+
+    Mathematical Formulation:
+        p_i = lambda_i / sum_{j=1}^d lambda_j
+        H = - sum_{i=1}^d p_i * log(p_i)
+        NID = H / log(d)
+
+    Measures effective dimensional utilization based on eigenspectrum Shannon entropy:
+    - NID = 1.0 indicates a perfectly flat spectrum (all eigenvalues equal, maximal isotropy).
+    - NID -> 0.0 indicates total dimensional collapse into a low-dimensional sub-manifold.
+
+    Args:
+        x: Input tensor of representations of shape (N, d).
+
+    Returns:
+        Normalized intrinsic dimensionality score in [0.0, 1.0].
+    """
     vals = torch.clamp(torch.linalg.eigvalsh(torch.cov(x.T)), min=0.0)
     d = vals.shape[0]
     if d <= 1:

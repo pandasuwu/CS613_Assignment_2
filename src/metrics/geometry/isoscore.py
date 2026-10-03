@@ -6,8 +6,22 @@ import torch
 def compute_isoscore(points: torch.Tensor) -> float:
     """Compute IsoScore measuring covariance diagonal defect from identity (Rudman et al., 2022).
 
-    IsoScore is 1.0 for perfect spherical isotropy (all eigenvalues equal)
-    and 0.0 for total dimensional collapse (single non-zero eigenvalue).
+    Mathematical Formulation:
+        lambda = eigvalsh(cov(points))
+        lambda_norm = (lambda * sqrt(d)) / ||lambda||_2
+        defect = ||lambda_norm - 1||_2 / sqrt(2 * (d - sqrt(d)))
+        defect_term = defect^2 * (d - sqrt(d))
+        IsoScore = ((d - defect_term)^2 - d) / (d * (d - 1))
+
+    Measures eigenspectrum defect from spherical isotropy:
+    - IsoScore = 1.0 indicates perfect spherical isotropy (all eigenvalues equal).
+    - IsoScore = 0.0 indicates total 1D dimensional collapse (single non-zero eigenvalue).
+
+    Args:
+        points: Input tensor of representations of shape (N, d).
+
+    Returns:
+        IsoScore in [0.0, 1.0].
     """
     cov_diag = torch.clamp(torch.linalg.eigvalsh(torch.cov(points.T)), min=0.0)
     d = cov_diag.shape[0]
@@ -18,7 +32,7 @@ def compute_isoscore(points: torch.Tensor) -> float:
     if cov_diag_norm <= 1e-12:
         return 0.0
 
-    # Step 4: Normalize diagonal to unit variance scaling
+    # Step 4: Scale diagonal so its L2 norm equals sqrt(d)
     cov_diag_normalized = (cov_diag * math.sqrt(d)) / cov_diag_norm
 
     # Step 5: Distance from uniform diagonal (vector of all ones)
@@ -31,7 +45,7 @@ def compute_isoscore(points: torch.Tensor) -> float:
 
     isotropy_defect = l2_distance / normalization_constant
 
-    # Steps 6 and 7: Scale-invariant score mapping to [0, 1]
+    # Steps 6 and 7: Scale-invariant score mapping to [0.0, 1.0]
     defect_term = (isotropy_defect**2) * (d - math.sqrt(d))
     score = ((d - defect_term) ** 2 - d) / (d * (d - 1))
 

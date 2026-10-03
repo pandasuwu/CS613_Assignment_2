@@ -19,8 +19,8 @@ from src.registry import (
     BASE_MODELS,
     BASE_POOLING_MODES,
     EMBEDDING_MODELS,
-    RETRIEVAL_CORE_TASKS,
-    SIMILARITY_CORE_TASKS,
+    RETRIEVAL_TASKS,
+    SIMILARITY_TASKS,
     get_raw_cache_dir,
     is_base_model,
 )
@@ -73,42 +73,42 @@ def encode_single_combination(
     # 2. Encode
     if is_base_model(model_id):
         if loaded_model is None or loaded_tokenizer is None:
-            model, tokenizer = load_base_model(model_id)
+            base_model, base_tokenizer = load_base_model(model_id)
         else:
-            model, tokenizer = loaded_model, loaded_tokenizer
+            base_model, base_tokenizer = loaded_model, loaded_tokenizer
 
         pool_mode = "mean" if (pooling == "mean_pooling" or pooling is None) else "last_token"
 
         if retrieval:
-            corpus_tensor = encode_base_texts(ds_ret.doc_texts, model, tokenizer, pooling=pool_mode, batch_size=batch_size_docs)
-            queries_tensor = encode_base_texts(ds_ret.query_texts, model, tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
+            corpus_tensor = encode_base_texts(ds_ret.doc_texts, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_docs)
+            queries_tensor = encode_base_texts(ds_ret.query_texts, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
             torch.save(corpus_tensor, cache_dir / "corpus.pt")
             torch.save(queries_tensor, cache_dir / "queries.pt")
             with open(meta_file, "w", encoding="utf-8") as f:
                 json.dump({"qids": ds_ret.query_ids, "dids": ds_ret.doc_ids, "qrels": ds_ret.qrels}, f)
         else:
-            s1_tensor = encode_base_texts(ds_sim.sentences1, model, tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
-            s2_tensor = encode_base_texts(ds_sim.sentences2, model, tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
+            s1_tensor = encode_base_texts(ds_sim.sentences1, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
+            s2_tensor = encode_base_texts(ds_sim.sentences2, base_model, base_tokenizer, pooling=pool_mode, batch_size=batch_size_queries)
             torch.save(s1_tensor, cache_dir / "sentences1.pt")
             torch.save(s2_tensor, cache_dir / "sentences2.pt")
             with open(meta_file, "w", encoding="utf-8") as f:
                 json.dump({"scores": ds_sim.scores}, f)
     else:
         if loaded_model is None:
-            model = load_embedding_model(model_id)
+            emb_model = load_embedding_model(model_id)
         else:
-            model = loaded_model
+            emb_model = loaded_model
 
         if retrieval:
-            corpus_tensor = encode_embedding_corpus(ds_ret.doc_texts, model, model_id, batch_size=batch_size_docs)
-            queries_tensor = encode_embedding_queries(ds_ret.query_texts, model, model_id, instruction=ds_ret.instruction, batch_size=batch_size_queries)
+            corpus_tensor = encode_embedding_corpus(ds_ret.doc_texts, emb_model, model_id, batch_size=batch_size_docs)
+            queries_tensor = encode_embedding_queries(ds_ret.query_texts, emb_model, model_id, instruction=ds_ret.instruction, batch_size=batch_size_queries)
             torch.save(corpus_tensor, cache_dir / "corpus.pt")
             torch.save(queries_tensor, cache_dir / "queries.pt")
             with open(meta_file, "w", encoding="utf-8") as f:
                 json.dump({"qids": ds_ret.query_ids, "dids": ds_ret.doc_ids, "qrels": ds_ret.qrels}, f)
         else:
-            s1_tensor = encode_embedding_sentences(ds_sim.sentences1, model, batch_size=batch_size_queries)
-            s2_tensor = encode_embedding_sentences(ds_sim.sentences2, model, batch_size=batch_size_queries)
+            s1_tensor = encode_embedding_sentences(ds_sim.sentences1, emb_model, batch_size=batch_size_queries)
+            s2_tensor = encode_embedding_sentences(ds_sim.sentences2, emb_model, batch_size=batch_size_queries)
             torch.save(s1_tensor, cache_dir / "sentences1.pt")
             torch.save(s2_tensor, cache_dir / "sentences2.pt")
             with open(meta_file, "w", encoding="utf-8") as f:
@@ -129,7 +129,7 @@ def main() -> None:
     args = parser.parse_args()
 
     models_to_run = [args.model] if args.model else (EMBEDDING_MODELS + BASE_MODELS)
-    tasks_to_run = [args.task] if args.task else (RETRIEVAL_CORE_TASKS + SIMILARITY_CORE_TASKS)
+    tasks_to_run = [args.task] if args.task else (RETRIEVAL_TASKS + SIMILARITY_TASKS)
 
     for model_id in models_to_run:
         # Load model once outside task loop to avoid reloading weights repeatedly

@@ -12,7 +12,7 @@ from src.registry import (
     BASE_POOLING_MODES,
     COMPRESSION_LADDER_K,
     EMBEDDING_MODELS,
-    SIMILARITY_CORE_TASKS,
+    SIMILARITY_TASKS,
     get_raw_cache_dir,
     get_result_dir,
     get_transformed_cache_dir,
@@ -132,7 +132,7 @@ def main() -> None:
     args = parser.parse_args()
 
     models_to_run = [args.model] if args.model else (EMBEDDING_MODELS + BASE_MODELS)
-    tasks_to_run = [args.task] if args.task else SIMILARITY_CORE_TASKS
+    tasks_to_run = [args.task] if args.task else SIMILARITY_TASKS
 
     for model_id in models_to_run:
         poolings = [args.pooling] if args.pooling else (BASE_POOLING_MODES if is_base_model(model_id) else [None])
