@@ -2,6 +2,7 @@ import argparse
 import json
 from typing import Any
 
+import mteb
 import torch
 
 from src.config import DEFAULT_BATCH_SIZE_DOCS, DEFAULT_BATCH_SIZE_QUERIES, logger
@@ -26,11 +27,9 @@ from src.registry import (
 
 
 def is_retrieval_task(task_name: str) -> bool:
-    """Identify if a task is an information retrieval benchmark."""
-    return task_name in (RETRIEVAL_CORE_TASKS + [
-        "FEVERHardNegatives", "ClimateFEVERHardNegatives", "HotpotQAHardNegatives",
-        "Touche2020Retrieval.v3", "CQADupstackGamingRetrieval", "CQADupstackUnixRetrieval", "SciFact"
-    ])
+    """Identify whether a task is retrieval using official MTEB metadata."""
+    task = mteb.get_task(task_name)
+    return getattr(task.metadata, "type", "") == "Retrieval"
 
 
 def encode_single_combination(

@@ -1,5 +1,4 @@
 import torch
-import torch.nn.functional as F
 from sentence_transformers import SentenceTransformer
 
 from src.config import logger
@@ -42,8 +41,7 @@ def encode_embedding_queries(
             convert_to_tensor=True,
         )
 
-    tensor = torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
-    return F.normalize(tensor, p=2, dim=1)
+    return torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
 
 
 def encode_embedding_corpus(
@@ -72,8 +70,7 @@ def encode_embedding_corpus(
             convert_to_tensor=True,
         )
 
-    tensor = torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
-    return F.normalize(tensor, p=2, dim=1)
+    return torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
 
 
 def encode_embedding_sentences(
@@ -90,5 +87,4 @@ def encode_embedding_sentences(
         show_progress_bar=show_progress,
         convert_to_tensor=True,
     )
-    tensor = torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
-    return F.normalize(tensor, p=2, dim=1)
+    return torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
