@@ -21,6 +21,7 @@ def encode_embedding_queries(
             batch_size=batch_size,
             show_progress_bar=show_progress,
             convert_to_tensor=True,
+            normalize_embeddings=True,
         )
     elif "qwen" in model_id.lower():
         prompt = f"Instruct: {instruction}\nQuery: " if instruction else None
@@ -60,6 +61,7 @@ def encode_embedding_corpus(
             batch_size=batch_size,
             show_progress_bar=show_progress,
             convert_to_tensor=True,
+            normalize_embeddings=True,
         )
     else:
         embeddings = model.encode(

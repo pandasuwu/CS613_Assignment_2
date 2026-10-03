@@ -20,6 +20,7 @@ def compute_mean_and_cov(
     mu = torch.mean(x, dim=0)
     cov = torch.cov(x.T)
     eigenvalues, eigenvectors = torch.linalg.eigh(cov)
+    eigenvalues = torch.clamp(eigenvalues, min=0.0)
 
     descending_idx = torch.argsort(eigenvalues, descending=True)
     return mu, eigenvalues[descending_idx], eigenvectors[:, descending_idx]

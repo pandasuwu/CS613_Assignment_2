@@ -9,7 +9,7 @@ def compute_isoscore(points: torch.Tensor) -> float:
     IsoScore is 1.0 for perfect spherical isotropy (all eigenvalues equal)
     and 0.0 for total dimensional collapse (single non-zero eigenvalue).
     """
-    cov_diag = torch.linalg.eigvalsh(torch.cov(points.T))
+    cov_diag = torch.clamp(torch.linalg.eigvalsh(torch.cov(points.T)), min=0.0)
     d = cov_diag.shape[0]
     if d <= 1:
         return 1.0

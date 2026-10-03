@@ -4,7 +4,7 @@ from typing import Any
 
 import torch
 
-from src.config import logger
+from src.config import get_device, logger
 from src.metrics.geometry import (
     compute_average_cosine,
     compute_centroid_norm,
@@ -92,7 +92,7 @@ def evaluate_geometry_combination(
         if not tensor_file.exists():
             continue
 
-        tensor = torch.load(tensor_file, weights_only=True)
+        tensor = torch.load(tensor_file, weights_only=True).to(get_device())
         res = evaluate_geometry_for_tensor(tensor, csv_path)
         logger.info(
             "[%s | %s | full | %s] Centroid=%.4f  AvgCos=%.4f  MEV=%.4f  NID=%.4f  IsoScore=%.4f",
@@ -114,7 +114,7 @@ def evaluate_geometry_combination(
             if not tensor_file.exists():
                 continue
 
-            tensor = torch.load(tensor_file, weights_only=True)
+            tensor = torch.load(tensor_file, weights_only=True).to(get_device())
             res = evaluate_geometry_for_tensor(tensor, csv_path, extra_cols={"k": k})
             logger.info(
                 "[%s | %s | compression | %s] Centroid=%.4f  AvgCos=%.4f  MEV=%.4f  NID=%.4f  IsoScore=%.4f",

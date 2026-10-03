@@ -7,6 +7,9 @@ def compute_mrr_at_k(
     k: int = 10,
 ) -> float:
     """Compute Mean Reciprocal Rank (MRR@K) using pytrec_eval."""
+    if not qrels:
+        return 0.0
+
     # Truncate run to top k documents per query for MRR@K
     truncated_run: dict[str, dict[str, float]] = {}
     for qid, doc_dict in run.items():
@@ -17,8 +20,7 @@ def compute_mrr_at_k(
     results = evaluator.evaluate(truncated_run)
 
     query_scores = [
-        results[qid]["recip_rank"] for qid in qrels if qid in results
+        float(results[qid]["recip_rank"]) if qid in results else 0.0
+        for qid in qrels
     ]
-    if not query_scores:
-        return 0.0
-    return float(sum(query_scores) / len(query_scores))
+    return float(sum(query_scores) / len(qrels))

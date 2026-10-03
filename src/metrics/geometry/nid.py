@@ -5,7 +5,7 @@ import torch
 
 def compute_nid(x: torch.Tensor) -> float:
     """Compute Normalized Intrinsic Dimensionality (NID) via normalized spectral entropy (Yokoi et al., 2024)."""
-    vals = torch.linalg.eigvalsh(torch.cov(x.T))
+    vals = torch.clamp(torch.linalg.eigvalsh(torch.cov(x.T)), min=0.0)
     d = vals.shape[0]
     if d <= 1:
         return 1.0

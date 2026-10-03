@@ -4,11 +4,14 @@ from src.transforms.common import l2_normalize
 
 
 def transform_standardization(
-    corpus: torch.Tensor, queries: torch.Tensor
+    corpus: torch.Tensor,
+    queries: torch.Tensor,
+    fit_data: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Coordinate-wise z-score standardization (Timkey & van Schijndel, 2021)."""
-    mu = torch.mean(corpus, dim=0)
-    sigma = torch.std(corpus, dim=0, unbiased=True)
+    ref = fit_data if fit_data is not None else corpus
+    mu = torch.mean(ref, dim=0)
+    sigma = torch.std(ref, dim=0, unbiased=True)
     sigma = torch.clamp(sigma, min=1e-9)
 
     c_std = (corpus - mu) / sigma

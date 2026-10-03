@@ -5,10 +5,13 @@ from src.transforms.common import l2_normalize
 
 
 def transform_r2(
-    corpus: torch.Tensor, queries: torch.Tensor
+    corpus: torch.Tensor,
+    queries: torch.Tensor,
+    fit_data: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Mean-subspace projection deflation and renormalization (Ren et al., 2025)."""
-    mu = corpus.mean(dim=0)
+    ref = fit_data if fit_data is not None else corpus
+    mu = ref.mean(dim=0)
     if torch.linalg.norm(mu) < 1e-12:
         return l2_normalize(corpus), l2_normalize(queries)
 

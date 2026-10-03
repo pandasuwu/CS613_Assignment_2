@@ -3,7 +3,7 @@ import json
 
 import torch
 
-from src.config import logger
+from src.config import get_device, logger
 from src.registry import (
     BASE_MODELS,
     BASE_POOLING_MODES,
@@ -52,21 +52,28 @@ def run_transforms_for_combination(
         corpus = torch.load(raw_dir / "sentences1.pt", weights_only=True)
         queries = torch.load(raw_dir / "sentences2.pt", weights_only=True)
 
+    device = get_device()
+    corpus = corpus.to(device)
+    queries = queries.to(device)
+
+    # For STS, symmetrically pool all sentences across both splits; for retrieval, fit strictly on corpus documents
+    fit_data = None if is_retrieval else torch.cat([corpus, queries], dim=0)
+
     native_d = corpus.shape[1]
-    logger.info("Transforming %s on %s (native_d=%d, pooling=%s)", model_id, task_name, native_d, pooling)
+    logger.info("Transforming %s on %s (native_d=%d, pooling=%s, device=%s)", model_id, task_name, native_d, pooling, device)
 
     # ==========================================
     # 1. Full-Dimension Transforms (d -> d)
     # ==========================================
     full_transforms = {
         "baseline": lambda c, q: transform_baseline(c, q),
-        "standardization": lambda c, q: transform_standardization(c, q),
-        "r1": lambda c, q: transform_r1(c, q),
-        "r2": lambda c, q: transform_r2(c, q),
-        "soft_zca": lambda c, q: transform_soft_zca(c, q, epsilon=1e-4),
-        "abtt_1": lambda c, q: transform_abtt(c, q, d_components=1),
-        "abtt_2": lambda c, q: transform_abtt(c, q, d_components=2),
-        "abtt_3": lambda c, q: transform_abtt(c, q, d_components=3),
+        "standardization": lambda c, q: transform_standardization(c, q, fit_data=fit_data),
+        "r1": lambda c, q: transform_r1(c, q, fit_data=fit_data),
+        "r2": lambda c, q: transform_r2(c, q, fit_data=fit_data),
+        "soft_zca": lambda c, q: transform_soft_zca(c, q, epsilon=1e-4, fit_data=fit_data),
+        "abtt_1": lambda c, q: transform_abtt(c, q, d_components=1, fit_data=fit_data),
+        "abtt_2": lambda c, q: transform_abtt(c, q, d_components=2, fit_data=fit_data),
+        "abtt_3": lambda c, q: transform_abtt(c, q, d_components=3, fit_data=fit_data),
         "rand": lambda c, q: transform_rand(c, q),
         "mc": lambda c, q: transform_mc(c, q),
     }
@@ -81,8 +88,8 @@ def run_transforms_for_combination(
             continue
 
         c_trans, q_trans = func(corpus, queries)
-        torch.save(c_trans, c_file)
-        torch.save(q_trans, q_file)
+        torch.save(c_trans.cpu(), c_file)
+        torch.save(q_trans.cpu(), q_file)
 
     # ==========================================
     # 2. Compression Transforms (d -> k)
@@ -98,8 +105,8 @@ def run_transforms_for_combination(
         q_file = out_prefix / ("queries.pt" if is_retrieval else "sentences2.pt")
         if overwrite or not (c_file.exists() and q_file.exists()):
             cp, qp = transform_prefix(corpus, queries, target_dim=k)
-            torch.save(cp, c_file)
-            torch.save(qp, q_file)
+            torch.save(cp.cpu(), c_file)
+            torch.save(qp.cpu(), q_file)
 
         # Random Truncation (negative control)
         out_rand = get_transformed_cache_dir(task_name, model_id, "compression", f"random_truncation_k{k}", pooling=pooling)
@@ -108,8 +115,8 @@ def run_transforms_for_combination(
         q_file = out_rand / ("queries.pt" if is_retrieval else "sentences2.pt")
         if overwrite or not (c_file.exists() and q_file.exists()):
             cr, qr = transform_random_truncation(corpus, queries, target_dim=k)
-            torch.save(cr, c_file)
-            torch.save(qr, q_file)
+            torch.save(cr.cpu(), c_file)
+            torch.save(qr.cpu(), q_file)
 
         # PCA
         out_pca = get_transformed_cache_dir(task_name, model_id, "compression", f"pca_k{k}", pooling=pooling)
@@ -117,9 +124,9 @@ def run_transforms_for_combination(
         c_file = out_pca / ("corpus.pt" if is_retrieval else "sentences1.pt")
         q_file = out_pca / ("queries.pt" if is_retrieval else "sentences2.pt")
         if overwrite or not (c_file.exists() and q_file.exists()):
-            cpca, qpca = transform_pca(corpus, queries, target_dim=k)
-            torch.save(cpca, c_file)
-            torch.save(qpca, q_file)
+            cpca, qpca = transform_pca(corpus, queries, target_dim=k, fit_data=fit_data)
+            torch.save(cpca.cpu(), c_file)
+            torch.save(qpca.cpu(), q_file)
 
         # Whitening
         out_white = get_transformed_cache_dir(task_name, model_id, "compression", f"whitening_k{k}", pooling=pooling)
@@ -127,9 +134,9 @@ def run_transforms_for_combination(
         c_file = out_white / ("corpus.pt" if is_retrieval else "sentences1.pt")
         q_file = out_white / ("queries.pt" if is_retrieval else "sentences2.pt")
         if overwrite or not (c_file.exists() and q_file.exists()):
-            cw, qw = transform_whitening(corpus, queries, target_dim=k)
-            torch.save(cw, c_file)
-            torch.save(qw, q_file)
+            cw, qw = transform_whitening(corpus, queries, target_dim=k, fit_data=fit_data)
+            torch.save(cw.cpu(), c_file)
+            torch.save(qw.cpu(), q_file)
 
         # SpecTemp
         out_spec = get_transformed_cache_dir(task_name, model_id, "compression", f"spectemp_k{k}", pooling=pooling)
@@ -137,9 +144,9 @@ def run_transforms_for_combination(
         c_file = out_spec / ("corpus.pt" if is_retrieval else "sentences1.pt")
         q_file = out_spec / ("queries.pt" if is_retrieval else "sentences2.pt")
         if overwrite or not (c_file.exists() and q_file.exists()):
-            cs, qs, gamma = transform_spectemp(corpus, queries, target_dim=k)
-            torch.save(cs, c_file)
-            torch.save(qs, q_file)
+            cs, qs, gamma = transform_spectemp(corpus, queries, target_dim=k, fit_data=fit_data)
+            torch.save(cs.cpu(), c_file)
+            torch.save(qs.cpu(), q_file)
             with open(out_spec / "gamma.json", "w", encoding="utf-8") as f:
                 json.dump({"gamma": gamma}, f)
 

@@ -13,7 +13,8 @@ def calculate_snr_curve(
     tail_start = int(d * tail_percentile)
     noise_variance = torch.mean(eigenvalues[tail_start:])
 
-    snr_curve = torch.clamp((eigenvalues[:tail_start] - noise_variance) / torch.clamp(noise_variance, min=1e-12), min=0.0)
+    noise_floor = torch.clamp(noise_variance, min=1e-8)
+    snr_curve = torch.clamp((eigenvalues[:tail_start] - noise_floor) / noise_floor, min=0.0)
     return snr_curve, noise_variance
 
 
@@ -58,9 +59,11 @@ def transform_spectemp(
     gamma: float | None = None,
     kneedle_s: float = 0.5,
     epsilon: float = 1e-6,
+    fit_data: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor, float]:
     """Adaptive SNR-tempered spectral projection (SpecTemp, Li et al., 2026)."""
-    mu, eigenvalues, eigenvectors = compute_mean_and_cov(corpus)
+    ref = fit_data if fit_data is not None else corpus
+    mu, eigenvalues, eigenvectors = compute_mean_and_cov(ref)
 
     if gamma is None:
         gamma_val = find_optimal_gamma(eigenvalues, target_dim=target_dim, kneedle_s=kneedle_s)

@@ -16,10 +16,7 @@ def load_base_model(model_id: str) -> tuple[Any, Any]:
         trust_remote_code=True,
     )
     if tokenizer.pad_token is None:
-        if tokenizer.eos_token is not None:
-            tokenizer.pad_token = tokenizer.eos_token
-        else:
-            tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        tokenizer.pad_token = tokenizer.eos_token
 
     model: Any = AutoModel.from_pretrained(
         model_id,

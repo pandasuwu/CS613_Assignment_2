@@ -5,7 +5,7 @@ from typing import Any
 
 import torch
 
-from src.config import logger
+from src.config import get_device, logger
 from src.metrics.similarity import compute_pearson_r, compute_spearman_rho
 from src.registry import (
     BASE_MODELS,
@@ -29,7 +29,7 @@ def evaluate_similarity_for_method(
 ) -> dict[str, float]:
     """Compute STS similarity metrics (Spearman rho, Pearson r) and save atomic CSV."""
     # Row-wise cosine similarity between paired sentences
-    sims = torch.sum(s1 * s2, dim=1)
+    sims = torch.sum(s1 * s2, dim=1).cpu()
 
     spearman_rho = compute_spearman_rho(sims, gold_scores)
     pearson_r = compute_pearson_r(sims, gold_scores)
@@ -82,8 +82,8 @@ def evaluate_similarity_combination(
         if not (s1_file.exists() and s2_file.exists()):
             continue
 
-        s1 = torch.load(s1_file, weights_only=True)
-        s2 = torch.load(s2_file, weights_only=True)
+        s1 = torch.load(s1_file, weights_only=True).to(get_device())
+        s2 = torch.load(s2_file, weights_only=True).to(get_device())
 
         res = evaluate_similarity_for_method(s1, s2, gold_scores, csv_path)
         logger.info(
@@ -106,8 +106,8 @@ def evaluate_similarity_combination(
             if not (s1_file.exists() and s2_file.exists()):
                 continue
 
-            s1 = torch.load(s1_file, weights_only=True)
-            s2 = torch.load(s2_file, weights_only=True)
+            s1 = torch.load(s1_file, weights_only=True).to(get_device())
+            s2 = torch.load(s2_file, weights_only=True).to(get_device())
 
             gamma_val: float | None = None
             if (trans_dir / "gamma.json").exists():

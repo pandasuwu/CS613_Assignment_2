@@ -5,7 +5,7 @@ from typing import Any
 
 import torch
 
-from src.config import DEFAULT_BATCH_SIZE_SEARCH, logger
+from src.config import DEFAULT_BATCH_SIZE_SEARCH, get_device, logger
 from src.metrics.retrieval import (
     compute_mrr_at_k,
     compute_ndcg_at_k,
@@ -38,17 +38,22 @@ def evaluate_retrieval_for_method(
     num_queries = queries.shape[0]
     run: dict[str, dict[str, float]] = {}
 
+    device = get_device()
+    corpus_dev = corpus.to(device)
+
     # Batched top-100 similarity search
     for i in range(0, num_queries, batch_size_search):
-        q_batch = queries[i : i + batch_size_search]
-        scores_batch = torch.matmul(q_batch, corpus.T)  # (batch_size, num_docs)
+        q_batch = queries[i : i + batch_size_search].to(device)
+        scores_batch = torch.matmul(q_batch, corpus_dev.T)  # (batch_size, num_docs)
         topk_scores, topk_indices = torch.topk(scores_batch, k=min(100, corpus.shape[0]), dim=1)
+        topk_scores_cpu = topk_scores.cpu()
+        topk_indices_cpu = topk_indices.cpu()
 
         for b_idx in range(q_batch.shape[0]):
             qid = qids[i + b_idx]
             run[qid] = {
                 dids[idx.item()]: float(score.item())
-                for idx, score in zip(topk_indices[b_idx], topk_scores[b_idx])
+                for idx, score in zip(topk_indices_cpu[b_idx], topk_scores_cpu[b_idx])
             }
 
     ndcg_10 = compute_ndcg_at_k(qrels, run, k=10)

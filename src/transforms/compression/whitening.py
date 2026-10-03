@@ -8,9 +8,11 @@ def transform_whitening(
     queries: torch.Tensor,
     target_dim: int = 512,
     epsilon: float = 1e-6,
+    fit_data: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Truncated Whitening-k transforming to identity covariance in R^k (Su et al., 2021)."""
-    mu, eigenvalues, eigenvectors = compute_mean_and_cov(corpus)
+    ref = fit_data if fit_data is not None else corpus
+    mu, eigenvalues, eigenvectors = compute_mean_and_cov(ref)
 
     u_k = eigenvectors[:, :target_dim]
     lam_k = eigenvalues[:target_dim]

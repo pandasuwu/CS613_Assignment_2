@@ -30,6 +30,12 @@ def load_retrieval_dataset(
         split = dataset_dict[split_name]
     elif "default" in dataset_dict and split_name in dataset_dict["default"]:
         split = dataset_dict["default"][split_name]
+    elif "dev" in dataset_dict:
+        logger.info("Split '%s' not found for task '%s'. Falling back to 'dev'.", split_name, task_name)
+        split = dataset_dict["dev"]
+    elif "validation" in dataset_dict:
+        logger.info("Split '%s' not found for task '%s'. Falling back to 'validation'.", split_name, task_name)
+        split = dataset_dict["validation"]
     else:
         available_splits = list(dataset_dict.keys())
         raise ValueError(
@@ -41,7 +47,8 @@ def load_retrieval_dataset(
     raw_qrels = split["relevant_docs"]
 
     # Format document text joining title and body text: "title text"
-    titles = corpus["title"] if "title" in corpus.column_names else [""] * len(corpus)
+    has_title = hasattr(corpus, "column_names") and "title" in corpus.column_names
+    titles = corpus["title"] if has_title else [""] * len(corpus)
     doc_texts = [
         f"{t} {x}".strip() if t else x for t, x in zip(titles, corpus["text"])
     ]

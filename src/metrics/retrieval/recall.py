@@ -7,13 +7,15 @@ def compute_recall_at_k(
     k: int = 100,
 ) -> float:
     """Compute Recall coverage at rank k (Recall@K) using pytrec_eval."""
+    if not qrels:
+        return 0.0
+
     metric_str = f"recall.{k}"
     evaluator = pytrec_eval.RelevanceEvaluator(qrels, {metric_str})
     results = evaluator.evaluate(run)
 
     query_scores = [
-        results[qid][f"recall_{k}"] for qid in qrels if qid in results
+        float(results[qid][f"recall_{k}"]) if qid in results else 0.0
+        for qid in qrels
     ]
-    if not query_scores:
-        return 0.0
-    return float(sum(query_scores) / len(query_scores))
+    return float(sum(query_scores) / len(qrels))

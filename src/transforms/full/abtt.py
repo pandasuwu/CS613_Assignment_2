@@ -4,10 +4,14 @@ from src.transforms.common import compute_mean_and_cov, l2_normalize
 
 
 def transform_abtt(
-    corpus: torch.Tensor, queries: torch.Tensor, d_components: int = 1
+    corpus: torch.Tensor,
+    queries: torch.Tensor,
+    d_components: int = 1,
+    fit_data: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """All-but-the-top principal component deflation (Mu & Viswanath, 2018; Ren et al., 2025)."""
-    mu, _, eigenvectors = compute_mean_and_cov(corpus)
+    ref = fit_data if fit_data is not None else corpus
+    mu, _, eigenvectors = compute_mean_and_cov(ref)
 
     u_top = eigenvectors[:, :d_components]  # Top D principal components (d, D)
 
