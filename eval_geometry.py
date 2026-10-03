@@ -101,7 +101,7 @@ def evaluate_geometry_combination(
         )
 
     # 2. Compression Transforms
-    compression_methods = ["prefix", "random_truncation", "pca", "whitening", "spectemp", "r2_spectemp"]
+    compression_methods = ["prefix", "random_truncation", "pca", "whitening", "spectemp"]
     for method in compression_methods:
         for k in COMPRESSION_LADDER_K:
             sub_name = f"{method}_k{k}"

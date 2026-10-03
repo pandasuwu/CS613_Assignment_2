@@ -39,7 +39,6 @@ Compression Transforms (d to k for k in 512, 256, 128, 64):
 - pca: Top-k principal component projection (Li et al., 2026)
 - whitening: Truncated Whitening-k variance equalization (Su et al., 2021)
 - spectemp: Adaptive SNR spectral tempering via Kneedle knee detection (Li et al., 2026)
-- r2_spectemp: Sequential composition of R2 deflation followed by SpecTemp compression
 
 ## Metrics
 

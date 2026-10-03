@@ -5,5 +5,6 @@ temp/
 cache/
 logs/
 specification.md
+future_work.md
 .ruff_cache/
 references/

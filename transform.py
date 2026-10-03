@@ -23,7 +23,6 @@ from src.transforms import (
     transform_prefix,
     transform_r1,
     transform_r2,
-    transform_r2_spectemp,
     transform_rand,
     transform_random_truncation,
     transform_soft_zca,
@@ -143,18 +142,6 @@ def run_transforms_for_combination(
             torch.save(qs, q_file)
             with open(out_spec / "gamma.json", "w", encoding="utf-8") as f:
                 json.dump({"gamma": gamma}, f)
-
-        # R2 + SpecTemp (Novel Composition)
-        out_r2spec = get_transformed_cache_dir(task_name, model_id, "compression", f"r2_spectemp_k{k}", pooling=pooling)
-        out_r2spec.mkdir(parents=True, exist_ok=True)
-        c_file = out_r2spec / ("corpus.pt" if is_retrieval else "sentences1.pt")
-        q_file = out_r2spec / ("queries.pt" if is_retrieval else "sentences2.pt")
-        if overwrite or not (c_file.exists() and q_file.exists()):
-            cr2s, qr2s, gamma_r2 = transform_r2_spectemp(corpus, queries, target_dim=k)
-            torch.save(cr2s, c_file)
-            torch.save(qr2s, q_file)
-            with open(out_r2spec / "gamma.json", "w", encoding="utf-8") as f:
-                json.dump({"gamma": gamma_r2}, f)
 
     logger.info("Completed all transforms for %s on %s", model_id, task_name)
 

@@ -2,7 +2,6 @@ from src.transforms.common import compute_mean_and_cov, l2_normalize
 from src.transforms.compression import (
     transform_pca,
     transform_prefix,
-    transform_r2_spectemp,
     transform_random_truncation,
     transform_spectemp,
     transform_whitening,
@@ -36,5 +35,4 @@ __all__ = [
     "transform_pca",
     "transform_whitening",
     "transform_spectemp",
-    "transform_r2_spectemp",
 ]
