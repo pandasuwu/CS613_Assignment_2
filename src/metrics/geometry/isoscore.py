@@ -2,8 +2,6 @@ import math
 
 import torch
 
-from src.transforms.common import compute_mean_and_cov
-
 
 def compute_isoscore(points: torch.Tensor) -> float:
     """Compute IsoScore measuring covariance diagonal defect from identity (Rudman et al., 2022).
@@ -11,12 +9,11 @@ def compute_isoscore(points: torch.Tensor) -> float:
     IsoScore is 1.0 for perfect spherical isotropy (all eigenvalues equal)
     and 0.0 for total dimensional collapse (single non-zero eigenvalue).
     """
-    _, eigenvalues, _, _ = compute_mean_and_cov(points)
-    d = eigenvalues.shape[0]
+    cov_diag = torch.linalg.eigvalsh(torch.cov(points.T))
+    d = cov_diag.shape[0]
     if d <= 1:
         return 1.0
 
-    cov_diag = eigenvalues
     cov_diag_norm = torch.linalg.norm(cov_diag)
     if cov_diag_norm <= 1e-12:
         return 0.0

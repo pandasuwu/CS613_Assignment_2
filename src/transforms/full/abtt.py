@@ -7,7 +7,7 @@ def transform_abtt(
     corpus: torch.Tensor, queries: torch.Tensor, d_components: int = 1
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """All-but-the-top principal component deflation (Mu & Viswanath, 2018; Ren et al., 2025)."""
-    mu, _, eigenvectors, _ = compute_mean_and_cov(corpus)
+    mu, _, eigenvectors = compute_mean_and_cov(corpus)
 
     u_top = eigenvectors[:, :d_components]  # Top D principal components (d, D)
 

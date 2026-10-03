@@ -7,7 +7,7 @@ def transform_soft_zca(
     corpus: torch.Tensor, queries: torch.Tensor, epsilon: float = 1e-4
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Eigenvalue-regularized Zero-phase Component Analysis (Soft-ZCA) whitening (Diera et al., 2024)."""
-    mu, eigenvalues, eigenvectors, _ = compute_mean_and_cov(corpus)
+    mu, eigenvalues, eigenvectors = compute_mean_and_cov(corpus)
 
     # Regularized inverse square root eigenvalues: bound noise amplification
     scales = 1.0 / torch.sqrt(torch.clamp(eigenvalues + epsilon, min=1e-12))

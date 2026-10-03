@@ -7,7 +7,7 @@ def transform_pca(
     corpus: torch.Tensor, queries: torch.Tensor, target_dim: int = 512
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Unweighted projection onto leading k principal components (Li et al., 2026)."""
-    mu, _, eigenvectors, _ = compute_mean_and_cov(corpus)
+    mu, _, eigenvectors = compute_mean_and_cov(corpus)
 
     u_k = eigenvectors[:, :target_dim]  # (d, k)
 

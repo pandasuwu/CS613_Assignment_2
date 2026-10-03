@@ -60,7 +60,7 @@ def transform_spectemp(
     epsilon: float = 1e-6,
 ) -> tuple[torch.Tensor, torch.Tensor, float]:
     """Adaptive SNR-tempered spectral projection (SpecTemp, Li et al., 2026)."""
-    mu, eigenvalues, eigenvectors, _ = compute_mean_and_cov(corpus)
+    mu, eigenvalues, eigenvectors = compute_mean_and_cov(corpus)
 
     if gamma is None:
         gamma_val = find_optimal_gamma(eigenvalues, target_dim=target_dim, kneedle_s=kneedle_s)

@@ -7,9 +7,5 @@ def transform_r1(
     corpus: torch.Tensor, queries: torch.Tensor
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Direct empirical mean subtraction and renormalization (Ren et al., 2025)."""
-    mu = torch.mean(corpus, dim=0)
-
-    c_r1 = corpus - mu
-    q_r1 = queries - mu
-
-    return l2_normalize(c_r1), l2_normalize(q_r1)
+    mu = corpus.mean(dim=0)
+    return l2_normalize(corpus - mu), l2_normalize(queries - mu)

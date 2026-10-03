@@ -10,7 +10,7 @@ def transform_whitening(
     epsilon: float = 1e-6,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Truncated Whitening-k transforming to identity covariance in R^k (Su et al., 2021)."""
-    mu, eigenvalues, eigenvectors, _ = compute_mean_and_cov(corpus)
+    mu, eigenvalues, eigenvectors = compute_mean_and_cov(corpus)
 
     u_k = eigenvectors[:, :target_dim]
     lam_k = eigenvalues[:target_dim]
