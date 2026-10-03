@@ -10,16 +10,12 @@ import torch
 ROOT_DIR: Path = Path(__file__).resolve().parent.parent
 CACHE_DIR: Path = ROOT_DIR / "cache"
 HF_HOME: Path = CACHE_DIR / "huggingface"
-TORCH_HOME: Path = CACHE_DIR / "torch"
-MTEB_CACHE: Path = CACHE_DIR / "mteb"
 EMBEDDINGS_CACHE_DIR: Path = CACHE_DIR / "embeddings"
 LOGS_DIR: Path = ROOT_DIR / "logs"
 RESULTS_DIR: Path = ROOT_DIR / "results"
 
 # 2. Enforce Project-Local Cache Isolation (Zero Home Directory Leakage)
 os.environ["HF_HOME"] = str(HF_HOME)
-os.environ["TORCH_HOME"] = str(TORCH_HOME)
-os.environ["MTEB_CACHE"] = str(MTEB_CACHE)
 
 # Propagate user Hugging Face authentication token if available without leaking cache
 if "HF_TOKEN" not in os.environ:
@@ -35,8 +31,6 @@ if "HF_TOKEN" not in os.environ:
 for directory in [
     CACHE_DIR,
     HF_HOME,
-    TORCH_HOME,
-    MTEB_CACHE,
     EMBEDDINGS_CACHE_DIR,
     LOGS_DIR,
     RESULTS_DIR,

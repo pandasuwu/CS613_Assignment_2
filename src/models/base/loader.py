@@ -21,7 +21,7 @@ def load_base_model(model_id: str) -> tuple[Any, Any]:
         else:
             tokenizer.add_special_tokens({"pad_token": "[PAD]"})
 
-    model = AutoModel.from_pretrained(
+    model: Any = AutoModel.from_pretrained(
         model_id,
         dtype=torch.float32,
         trust_remote_code=True,

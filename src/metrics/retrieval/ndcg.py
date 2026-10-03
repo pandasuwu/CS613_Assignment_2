@@ -1,4 +1,3 @@
-import numpy as np
 import pytrec_eval
 
 
@@ -17,4 +16,4 @@ def compute_ndcg_at_k(
     ]
     if not query_scores:
         return 0.0
-    return float(np.mean(query_scores))
+    return float(sum(query_scores) / len(query_scores))

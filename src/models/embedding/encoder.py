@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 import torch.nn.functional as F
 from sentence_transformers import SentenceTransformer
@@ -22,6 +21,7 @@ def encode_embedding_queries(
             texts,
             batch_size=batch_size,
             show_progress_bar=show_progress,
+            convert_to_tensor=True,
         )
     elif "qwen" in model_id.lower():
         prompt = f"Instruct: {instruction}\nQuery: " if instruction else None
@@ -31,6 +31,7 @@ def encode_embedding_queries(
             batch_size=batch_size,
             normalize_embeddings=True,
             show_progress_bar=show_progress,
+            convert_to_tensor=True,
         )
     else:
         embeddings = model.encode(
@@ -38,15 +39,10 @@ def encode_embedding_queries(
             batch_size=batch_size,
             normalize_embeddings=True,
             show_progress_bar=show_progress,
+            convert_to_tensor=True,
         )
 
-    if isinstance(embeddings, np.ndarray):
-        tensor = torch.from_numpy(embeddings).to(torch.float32)
-    elif isinstance(embeddings, torch.Tensor):
-        tensor = embeddings.detach().cpu().to(torch.float32)
-    else:
-        tensor = torch.tensor(embeddings, dtype=torch.float32)
-
+    tensor = torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
     return F.normalize(tensor, p=2, dim=1)
 
 
@@ -65,6 +61,7 @@ def encode_embedding_corpus(
             texts,
             batch_size=batch_size,
             show_progress_bar=show_progress,
+            convert_to_tensor=True,
         )
     else:
         embeddings = model.encode(
@@ -72,15 +69,10 @@ def encode_embedding_corpus(
             batch_size=batch_size,
             normalize_embeddings=True,
             show_progress_bar=show_progress,
+            convert_to_tensor=True,
         )
 
-    if isinstance(embeddings, np.ndarray):
-        tensor = torch.from_numpy(embeddings).to(torch.float32)
-    elif isinstance(embeddings, torch.Tensor):
-        tensor = embeddings.detach().cpu().to(torch.float32)
-    else:
-        tensor = torch.tensor(embeddings, dtype=torch.float32)
-
+    tensor = torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
     return F.normalize(tensor, p=2, dim=1)
 
 
@@ -96,12 +88,7 @@ def encode_embedding_sentences(
         batch_size=batch_size,
         normalize_embeddings=True,
         show_progress_bar=show_progress,
+        convert_to_tensor=True,
     )
-    if isinstance(embeddings, np.ndarray):
-        tensor = torch.from_numpy(embeddings).to(torch.float32)
-    elif isinstance(embeddings, torch.Tensor):
-        tensor = embeddings.detach().cpu().to(torch.float32)
-    else:
-        tensor = torch.tensor(embeddings, dtype=torch.float32)
-
+    tensor = torch.as_tensor(embeddings, dtype=torch.float32).detach().cpu()
     return F.normalize(tensor, p=2, dim=1)
