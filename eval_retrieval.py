@@ -5,7 +5,7 @@ from typing import Any
 
 import torch
 
-from src.config import logger
+from src.config import DEFAULT_BATCH_SIZE_SEARCH, logger
 from src.metrics.retrieval import (
     compute_mrr_at_k,
     compute_ndcg_at_k,
@@ -31,7 +31,7 @@ def evaluate_retrieval_for_method(
     dids: list[str],
     qrels: dict[str, dict[str, int]],
     out_csv: Path,
-    batch_size_search: int = 128,
+    batch_size_search: int = DEFAULT_BATCH_SIZE_SEARCH,
     extra_cols: dict[str, Any] | None = None,
 ) -> dict[str, float]:
     """Compute retrieval metrics (nDCG@10, Recall@100, MRR@10) and save atomic CSV."""
@@ -155,7 +155,7 @@ def main() -> None:
     parser.add_argument("--task", type=str, default=None, help="Task name. Default: all retrieval tasks.")
     parser.add_argument("--pooling", type=str, default=None, help="Pooling mode for base LLMs.")
     parser.add_argument("--overwrite", action="store_true", help="Re-evaluate and overwrite existing CSVs.")
-    parser.add_argument("--batch-size-search", type=int, default=128, help="Batch size for similarity ranking.")
+    parser.add_argument("--batch-size-search", type=int, default=DEFAULT_BATCH_SIZE_SEARCH, help="Batch size for similarity ranking.")
 
     args = parser.parse_args()
 

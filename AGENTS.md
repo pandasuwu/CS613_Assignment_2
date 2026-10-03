@@ -15,6 +15,7 @@
 - Use conventional commits for all git commit messages.
 - Use a project-local temp/ directory as an ephemeral scratchpad and delete it after task completion. Never use system /tmp/.
 - Route all downloads, cached weights, tokenizers, and dataset artifacts into a project-local cache/ directory. Never pollute the user's home directory (~/.cache).
+- Inherit user authentication credentials non-destructively for isolated local caching without modifying or reading unapproved global configuration files.
 
 # Codebase Architecture
 
@@ -30,6 +31,7 @@
 - Dynamically detect and leverage available hardware accelerators (CUDA, MPS, CPU).
 - Maximize performance by parallelizing workloads across available compute resources.
 - Standardize numerical precision on torch.float32 across all model representations, covariance computations, and transformations unless double precision is explicitly required.
+- Tune batch sizes empirically based on sequence length and hardware architecture (e.g. Apple Silicon unified memory vs CUDA) to maximize compute saturation without memory bandwidth bottlenecks.
 
 # Environment and Tooling
 

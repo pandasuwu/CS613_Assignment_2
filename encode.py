@@ -4,7 +4,7 @@ from typing import Any
 
 import torch
 
-from src.config import logger
+from src.config import DEFAULT_BATCH_SIZE_DOCS, DEFAULT_BATCH_SIZE_QUERIES, logger
 from src.data import load_retrieval_dataset, load_similarity_dataset
 from src.models import (
     encode_base_texts,
@@ -38,8 +38,8 @@ def encode_single_combination(
     task_name: str,
     pooling: str | None = None,
     overwrite: bool = False,
-    batch_size_docs: int = 16,
-    batch_size_queries: int = 64,
+    batch_size_docs: int = DEFAULT_BATCH_SIZE_DOCS,
+    batch_size_queries: int = DEFAULT_BATCH_SIZE_QUERIES,
     loaded_model: Any = None,
     loaded_tokenizer: Any = None,
 ) -> None:
@@ -124,8 +124,8 @@ def main() -> None:
     parser.add_argument("--task", type=str, default=None, help="Task name (e.g. FiQA2018, STSBenchmark). Default: all core tasks.")
     parser.add_argument("--pooling", type=str, default=None, help="Pooling mode for base LLMs (mean_pooling or last_token_pooling).")
     parser.add_argument("--overwrite", action="store_true", help="Re-encode and overwrite existing cache.")
-    parser.add_argument("--batch-size-docs", type=int, default=16, help="Batch size for encoding documents.")
-    parser.add_argument("--batch-size-queries", type=int, default=64, help="Batch size for encoding queries/sentences.")
+    parser.add_argument("--batch-size-docs", type=int, default=DEFAULT_BATCH_SIZE_DOCS, help="Batch size for encoding documents.")
+    parser.add_argument("--batch-size-queries", type=int, default=DEFAULT_BATCH_SIZE_QUERIES, help="Batch size for encoding queries/sentences.")
 
     args = parser.parse_args()
 

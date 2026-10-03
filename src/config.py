@@ -48,6 +48,11 @@ SEED: int = 2026
 MAX_SEQ_LENGTH: int = 2048
 DTYPE: torch.dtype = torch.float32
 
+# Batch sizes optimized for Apple Silicon MPS and high-throughput execution
+DEFAULT_BATCH_SIZE_DOCS: int = 32
+DEFAULT_BATCH_SIZE_QUERIES: int = 64
+DEFAULT_BATCH_SIZE_SEARCH: int = 256
+
 
 def set_seed(seed: int = SEED) -> None:
     """Set deterministic random seeds across all libraries."""
